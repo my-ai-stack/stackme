@@ -1,0 +1,21 @@
+/* Stackme content script styles */
+
+.stackme-injected {
+  border-color: #a855f7 !important;
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.2) !important;
+}
+
+#stackme-toast {
+  animation: stackme-slide-in 0.3s ease;
+}
+
+@keyframes stackme-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

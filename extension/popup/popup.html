@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stackme</title>
+  <style>
+    :root {
+      --bg: #02020a;
+      --surface: #0a0a14;
+      --border: #1a1a2e;
+      --text: #e8e8f0;
+      --text-muted: #6b6b8a;
+      --accent: #a855f7;
+      --accent-bright: #c084fc;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 320px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      padding: 16px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .logo {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #a855f7, #6366f1);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+    .brand { font-size: 1.1rem; font-weight: 800; }
+    .brand span { color: var(--accent-bright); }
+    .status {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .status strong { color: var(--accent-bright); }
+    .section-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+    .fact-input-wrap {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .fact-input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      outline: none;
+    }
+    .fact-input:focus {
+      border-color: var(--accent);
+    }
+    .fact-input::placeholder { color: var(--text-muted); }
+    .add-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .add-btn:hover { background: var(--accent-bright); }
+    .facts-list {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px;
+      max-height: 160px;
+      overflow-y: auto;
+      margin-bottom: 12px;
+    }
+    .fact-item {
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      margin-bottom: 4px;
+      color: var(--text);
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+    .fact-item:hover { background: rgba(168,85,247,0.08); }
+    .fact-item .dot { color: var(--accent-bright); font-size: 0.6rem; margin-top: 4px; flex-shrink: 0; }
+    .empty { color: var(--text-muted); font-size: 0.78rem; text-align: center; padding: 12px; }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .toggle-label { font-size: 0.82rem; font-weight: 500; }
+    .toggle {
+      position: relative;
+      width: 36px;
+      height: 20px;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      left: 3px;
+      top: 3px;
+      width: 14px;
+      height: 14px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+    .toggle input:checked + .toggle-slider { background: var(--accent); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(16px); }
+    .footer {
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .footer-links { display: flex; gap: 10px; }
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.72rem;
+    }
+    .footer-links a:hover { color: var(--text); }
+    .clear-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 0.72rem;
+      cursor: pointer;
+    }
+    .clear-btn:hover { border-color: #ef4444; color: #ef4444; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">🧠</div>
+  <div class="brand">stack<span>me</span></div>
+</div>
+
+<div class="status" id="status">
+  <strong id="count">0</strong> memories stored · local only
+</div>
+
+<div class="toggle-row">
+  <span class="toggle-label">Context injection</span>
+  <label class="toggle">
+    <input type="checkbox" id="injectToggle" checked />
+    <span class="toggle-slider"></span>
+  </label>
+</div>
+
+<div class="section-title">Add a fact</div>
+<div class="fact-input-wrap">
+  <input class="fact-input" id="factInput" type="text" placeholder="e.g. I run a fintech SaaS..." />
+  <button class="add-btn" id="addBtn">Add</button>
+</div>
+
+<div class="section-title">Your memory</div>
+<div class="facts-list" id="factsList">
+  <div class="empty">No memories yet. Add your first fact above.</div>
+</div>
+
+<div class="footer">
+  <div class="footer-links">
+    <a href="https://github.com/my-ai-stack/stackme" target="_blank">GitHub</a>
+    <a href="https://stack-ai.me/stackme" target="_blank">Docs</a>
+  </div>
+  <button class="clear-btn" id="clearBtn">Clear all</button>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
