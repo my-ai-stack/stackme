@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "stackme"
+version = "0.1.0"
+description = "The context layer for every AI. Your memory brain, stored locally."
+readme = "README.md"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "Stack AI", email = "hello@stack-ai.me"}
+]
+keywords = ["ai", "memory", "context", "llm", "agentic", "rag", "tool-calling"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-asyncio"]
+
+[project.urls]
+Homepage = "https://stack-ai.me/stackme"
+Documentation = "https://stack-ai.me/stackme/docs"
+Repository = "https://github.com/my-ai-stack/stackme"
+HuggingFace = "https://huggingface.co/my-ai-stack/stackme"
+
+[tool.hatch.build.targets.wheel]
+packages = ["stackme"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
