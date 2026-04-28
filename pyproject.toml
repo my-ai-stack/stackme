@@ -29,6 +29,9 @@ dependencies = []
 [project.optional-dependencies]
 dev = ["pytest", "pytest-asyncio"]
 
+[project.scripts]
+stackme = "stackme.cli:main"
+
 [project.urls]
 Homepage = "https://stack-ai.me/stackme"
 Documentation = "https://stack-ai.me/stackme/docs"
