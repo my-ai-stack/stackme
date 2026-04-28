@@ -1,17 +1,19 @@
 {
   "manifest_version": 3,
   "name": "Stackme — AI Context Memory",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Your context brain for every AI. Injects your memory into ChatGPT, Claude, Copilot and more.",
   "permissions": [
     "activeTab",
-    "storage"
+    "storage",
+    "tabs"
   ],
   "host_permissions": [
     "https://chat.openai.com/*",
     "https://claude.ai/*",
     "https://copilot.microsoft.com/*",
-    "https://gemini.google.com/*"
+    "https://gemini.google.com/*",
+    "https://chatgpt.com/*"
   ],
   "action": {
     "default_popup": "popup/popup.html",
@@ -32,7 +34,8 @@
         "https://chat.openai.com/*",
         "https://claude.ai/*",
         "https://copilot.microsoft.com/*",
-        "https://gemini.google.com/*"
+        "https://gemini.google.com/*",
+        "https://chatgpt.com/*"
       ],
       "js": ["content.js"],
       "css": ["content.css"],

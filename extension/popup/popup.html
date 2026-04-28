@@ -21,6 +21,7 @@
       color: var(--text);
       font-family: system-ui, -apple-system, sans-serif;
       padding: 16px;
+      position: relative;
     }
     .header {
       display: flex;
@@ -106,9 +107,24 @@
       display: flex;
       align-items: flex-start;
       gap: 6px;
+      position: relative;
     }
     .fact-item:hover { background: rgba(168,85,247,0.08); }
     .fact-item .dot { color: var(--accent-bright); font-size: 0.6rem; margin-top: 4px; flex-shrink: 0; }
+    .fact-item .fact-content { flex: 1; word-break: break-word; }
+    .fact-item .delete-btn {
+      opacity: 0;
+      background: transparent;
+      border: none;
+      color: #ef4444;
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 0 4px;
+      margin-left: auto;
+      transition: opacity 0.2s;
+    }
+    .fact-item:hover .delete-btn { opacity: 1; }
+    .fact-item .delete-btn:hover { color: #f87171; }
     .empty { color: var(--text-muted); font-size: 0.78rem; text-align: center; padding: 12px; }
     .toggle-row {
       display: flex;
@@ -144,6 +160,23 @@
     }
     .toggle input:checked + .toggle-slider { background: var(--accent); }
     .toggle input:checked + .toggle-slider::before { transform: translateX(16px); }
+    .inject-btn {
+      width: 100%;
+      background: transparent;
+      border: 1px solid var(--accent);
+      color: var(--accent-bright);
+      border-radius: 8px;
+      padding: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 12px;
+      transition: all 0.2s;
+    }
+    .inject-btn:hover {
+      background: var(--accent);
+      color: white;
+    }
     .footer {
       border-top: 1px solid var(--border);
       padding-top: 10px;
@@ -168,6 +201,13 @@
       cursor: pointer;
     }
     .clear-btn:hover { border-color: #ef4444; color: #ef4444; }
+    .shortcut-hint {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 8px;
+      opacity: 0.7;
+    }
   </style>
 </head>
 <body>
@@ -188,6 +228,9 @@
     <span class="toggle-slider"></span>
   </label>
 </div>
+
+<button class="inject-btn" id="injectNowBtn">Inject Context Now</button>
+<div class="shortcut-hint">Or press Ctrl+Shift+M on the page</div>
 
 <div class="section-title">Add a fact</div>
 <div class="fact-input-wrap">

@@ -20,6 +20,16 @@ from typing import Any, Optional
 from dataclasses import dataclass, field, asdict
 from collections import defaultdict
 
+# Import embedding providers
+from .embeddings import (
+    EmbeddingProvider,
+    SimpleEmbeddingProvider,
+    SentenceTransformerEmbeddingProvider,
+    OpenAIEmbeddingProvider,
+    create_embedding_provider,
+    get_default_provider,
+)
+
 # ─── App Directory ────────────────────────────────────────────────────────────
 
 def _stackme_dir() -> Path:
@@ -55,7 +65,10 @@ class GraphFact:
 # ─── Simple Embedding (cosine sim without external deps) ──────────────────────
 
 def _simple_vec(text: str, dim: int = 128) -> list[float]:
-    """Deterministic fake embedding from text hash — good enough for semantic search demo."""
+    """Deterministic fake embedding from text hash — good enough for semantic search demo.
+
+    Note: This is kept for backward compatibility. Use EmbeddingProvider for real embeddings.
+    """
     h = hashlib.sha256(text.encode()).digest()
     vec = []
     for i in range(dim):
@@ -66,6 +79,7 @@ def _simple_vec(text: str, dim: int = 128) -> list[float]:
 
 
 def _cosine(a: list[float], b: list[float]) -> float:
+    """Compute cosine similarity between two vectors."""
     dot = sum(x * y for x, y in zip(a, b))
     na = sum(x * x for x in a) ** 0.5
     nb = sum(x * x for x in b) ** 0.5
@@ -77,8 +91,14 @@ def _cosine(a: list[float], b: list[float]) -> float:
 class Storage:
     """SQLite + FAISS-lite storage for MemoryItems."""
 
-    def __init__(self, db_path: Path | None = None, dim: int = 128):
-        self.dim = dim
+    def __init__(
+        self,
+        db_path: Path | None = None,
+        embedding_provider: EmbeddingProvider | None = None,
+    ):
+        # Use provided embedding provider or get default
+        self.embedding_provider = embedding_provider or get_default_provider()
+        self.dim = self.embedding_provider.dimension
         self.db_path = db_path or str(_stackme_dir() / "memory.sqlite")
         self.faiss_path = str(_stackme_dir() / "vectors.faiss")
         self._conn = sqlite3.connect(self.db_path, check_same_thread=False)
@@ -132,7 +152,8 @@ class Storage:
     def add(self, item: MemoryItem) -> str:
         """Store a memory item with optional embedding."""
         if item.embedding is None:
-            item.embedding = _simple_vec(item.content, self.dim)
+            # Use the embedding provider to generate the embedding
+            item.embedding = self.embedding_provider.encode(item.content)
         self._conn.execute(
             """INSERT OR REPLACE INTO memory
                (id, type, content, metadata, created_at, last_accessed, access_count, user_id)
@@ -148,7 +169,8 @@ class Storage:
 
     def search(self, query: str, top_k: int = 5, user_id: str = "default") -> list[MemoryItem]:
         """Semantic search against stored memories."""
-        qvec = _simple_vec(query, self.dim)
+        # Use the embedding provider to encode the query
+        qvec = self.embedding_provider.encode(query)
         rows = self._conn.execute(
             """SELECT id, type, content, metadata, created_at, last_accessed, access_count, user_id
                FROM memory WHERE user_id = ? ORDER BY created_at DESC LIMIT 200""",
@@ -366,7 +388,16 @@ class Context:
 
     Usage:
         from stackme import Context
+
+        # Default: uses sentence-transformers (all-MiniLM-L6-v2) if available,
+        # falls back to simple embeddings
         ctx = Context()
+
+        # Use simple hash-based embeddings (for demos or no dependencies)
+        ctx = Context(embedding="simple")
+
+        # Use OpenAI embeddings (requires OPENAI_API_KEY)
+        ctx = Context(embedding="openai", api_key="your-api-key")
 
         ctx.add_fact("I run a fintech startup")
         ctx.add_fact("Q3 goal: 10K paying customers")
@@ -379,9 +410,47 @@ class Context:
         # → auto-extracts facts: (User, is_a, B2B SaaS), (User, targets, fintech)
     """
 
-    def __init__(self, user_id: str = "default"):
+    def __init__(
+        self,
+        user_id: str = "default",
+        embedding: str | EmbeddingProvider = "sentence-transformers",
+        api_key: str | None = None,
+    ):
+        """
+        Initialize a Context instance.
+
+        Args:
+            user_id: User identifier for isolating memories
+            embedding: Embedding provider to use. Options:
+                - "sentence-transformers" (default): Uses all-MiniLM-L6-v2
+                - "simple": Uses hash-based pseudo-embeddings
+                - "openai": Uses OpenAI text-embedding-3-small
+                - Or pass an EmbeddingProvider instance directly
+            api_key: API key for OpenAI embeddings (only used if embedding="openai")
+        """
         self.user_id = user_id
-        self.storage = Storage()
+
+        # Create embedding provider based on configuration
+        if isinstance(embedding, EmbeddingProvider):
+            embedding_provider = embedding
+        elif embedding == "simple":
+            embedding_provider = SimpleEmbeddingProvider()
+        elif embedding == "sentence-transformers":
+            try:
+                embedding_provider = SentenceTransformerEmbeddingProvider()
+            except ImportError:
+                # Fall back to simple if sentence-transformers not available
+                embedding_provider = SimpleEmbeddingProvider()
+        elif embedding == "openai":
+            embedding_provider = OpenAIEmbeddingProvider(api_key=api_key)
+        else:
+            raise ValueError(
+                f"Unknown embedding type: {embedding}. "
+                "Valid options: 'simple', 'sentence-transformers', 'openai', "
+                "or pass an EmbeddingProvider instance."
+            )
+
+        self.storage = Storage(embedding_provider=embedding_provider)
         self.session = SessionMemory()
         self.kg = KnowledgeGraph(self.storage)
 

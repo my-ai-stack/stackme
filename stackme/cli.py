@@ -5,6 +5,7 @@ import argparse
 import sys
 import json
 from . import Context
+from .server import run_server
 
 
 def main():
@@ -54,6 +55,12 @@ def main():
 
     # stackme clear-all
     p_clear_all = sub.add_parser("clear-all", help="Wipe ALL memory (irreversible)")
+
+    # stackme server
+    p_server = sub.add_parser("server", help="Start REST API server")
+    p_server.add_argument("--host", default="0.0.0.0", help="Host to bind to")
+    p_server.add_argument("--port", type=int, default=8000, help="Port to bind to")
+    p_server.add_argument("--reload", action="store_true", help="Enable auto-reload")
 
     args = parser.parse_args()
     ctx = Context()
@@ -122,6 +129,11 @@ def main():
             print("✅ All memory wiped")
         else:
             print("Cancelled.")
+
+    elif args.command == "server":
+        print(f"Starting Stackme server on http://{args.host}:{args.port}")
+        print("API docs available at http://{args.host}:{args.port}/docs")
+        run_server(host=args.host, port=args.port, reload=args.reload)
 
 
 if __name__ == "__main__":
