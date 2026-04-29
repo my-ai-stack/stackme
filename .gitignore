@@ -1,11 +1,4 @@
-__pycache__/
-*.py[cod]
-*.egg-info/
+stackme/__pycache__/
+*.pyc
+.DS_Store
 dist/
-build/
-.eggs/
-.pytest_cache/
-.stackme/
-*.sqlite
-vectors.faiss
-.env
